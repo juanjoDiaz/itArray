@@ -1,11 +1,26 @@
-import TransformIterableIterator from "../TransformIterableIterator";
+import IterableWithSource from "../IterableWithSource";
 
-export default class MapIterableIterator<TIn, TOut = TIn> extends TransformIterableIterator<TIn, TOut> {
+export default class MapIterable<TIn, TOut = TIn> extends IterableWithSource<TIn, TOut> {
+  public fn: (v: TIn, k: number) => TOut;
+  protected index: number = 0;
+
+  constructor(source: Iterable<TIn>, fn: (v: TIn, k: number) => TOut) {
+    super(source);
+    this.fn = fn;
+  }
+
+  [Symbol.iterator](): Iterator<TOut> {
+    return new MapIterator(this.source, this.fn);
+  }
+}
+
+class MapIterator<TIn, TOut = TIn> implements Iterator<TOut, undefined> {
+  protected source: Iterator<any, TIn>;
   protected fn: (v: TIn, k: number) => TOut;
   protected index: number = 0;
 
-  constructor(source: IterableIterator<TIn>, fn: (v: TIn, k: number) => TOut) {
-    super(source);
+  constructor(source: Iterable<TIn>, fn: (v: TIn, k: number) => TOut) {
+    this.source = source[Symbol.iterator]();
     this.fn = fn;
   }
 
@@ -17,9 +32,5 @@ export default class MapIterableIterator<TIn, TOut = TIn> extends TransformItera
     }
 
     return { done, value: this.fn(value, this.index++) };
-  }
-
-  [Symbol.iterator](): IterableIterator<TOut> {
-    return new MapIterableIterator(this.source, this.fn);
   }
 }

@@ -1,17 +1,33 @@
-// import ValuesIterableIterator from "./ValuesIterableIterator";
+import IterableWithSource from "../IterableWithSource";
 
-// class ReverseIterableIterator<T> extends ValuesIterableIterator<T> {
-//   constructor(source: IterableIterator<T>) {
-//     super(source);
-//   }
+export default class ReverseIterable<T> extends IterableWithSource<T, T> {
+  constructor(source: Iterable<T>) {
+    super(source);
+  }
 
-//   next(): IteratorResult<T, undefined> {
-//     this.source = new ArrayIterable(source.toArray().reverse());
-//     this.next = super.next;
-//     return this.next();
-//   }
+  [Symbol.iterator](): Iterator<T> {
+    return new ReverseIterator(this.source);
+  }
+}
 
-//   [Symbol.iterator](): IterableIterator<T> {
-//     return new ReverseIterableIterator(this.source);
-//   }
-// }
+class ReverseIterator<T> implements Iterator<T> {
+  protected rawSource: Iterable<T>;
+  protected source?: Iterator<T>;
+
+  constructor(source: Iterable<T>) {
+    this.rawSource = source;
+  }
+
+  next(): IteratorResult<T, undefined> {
+    if (!this.source) this.source = this.reverseInMemory();
+    return this.source.next();
+  }
+
+  reverseInMemory(): Iterator<T> {
+    const reversedArray = [];
+    for (const element of this.rawSource) {
+      reversedArray.unshift(element);
+    }
+    return reversedArray[Symbol.iterator]();
+  }
+}

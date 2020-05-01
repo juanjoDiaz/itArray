@@ -1,26 +1,27 @@
-import JoinReducer from "./Join";
-import MapIterableIterator from "../Iterators/Map";
+// import JoinReducer from "./Join";
+// import MapIterableIterator from "../Iterators/Map";
+// import IterableWithSource from "../IterableWithSource";
 
-interface Stringifiable {
-  toString(): String
-}
+// interface Stringifiable {
+//   toString(): String
+// }
 
-function isStringifiable(obj: any): obj is Stringifiable {
-  return typeof (obj as Stringifiable).toString === 'function';
-}
+// function isStringifiable(obj: any): obj is Stringifiable {
+//   return typeof (obj as Stringifiable).toString === 'function';
+// }
 
-function safeStringify<T>(obj: T): string {
-  return isStringifiable(obj)
-    ? (obj as Stringifiable).toString() as string
-    : String(obj);
-}
+// function safeStringify<T>(obj: T): string {
+//   return isStringifiable(obj)
+//     ? (obj as Stringifiable).toString() as string
+//     : String(obj);
+// }
 
-export default class ToStringReducer<T> extends JoinReducer<String> {
-  constructor(source: IterableIterator<T>) {
-    super(new MapIterableIterator(source, (val) => safeStringify(val)), ',');
-  }
+// export default class ToStringReducer<T> extends IterableWithSource<T, string> {
+//   constructor(source: Iterable<T>) {
+//     super(source);
+//   }
 
-  [Symbol.iterator](): IterableIterator<string> {
-    return new JoinReducer(this.source, this.separator);
-  }
-}
+//   [Symbol.iterator](): Iterator<string> {
+//     return new JoinReducer(new MapIterableIterator(this.source, (val) => safeStringify(val)), ',')[Symbol.iterator]();
+//   }
+// }

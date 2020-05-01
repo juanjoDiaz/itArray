@@ -1,22 +1,34 @@
-import TransformIterableIterator from "../TransformIterableIterator";
-import ArrayTransIterableIterator from "../ArrayTransIterableIterator";
+import IterableWithSource from "../IterableWithSource";
 
 function isIterable<T>(obj: any): obj is Iterable<Iterable<T>> {
   return typeof obj[Symbol.iterator] === 'function';
 }
 
-export default class FlatIterableIterator<T> extends TransformIterableIterator<T | Iterable<T>, T> {
-  protected rawSource: IterableIterator<T | Iterable<T>>;
+export default class FlatIterable<T> extends IterableWithSource<T | Iterable<T>, T> {
   protected depth?: number;
-  protected currentSource: Iterator<T> | undefined;
 
-  constructor(source: IterableIterator<T | Iterable<T>>, depth?: number) {
+  constructor(source: Iterable<T | Iterable<T>>, depth?: number) {
+    super(source);
+    this.depth = depth;
+  }
+
+  [Symbol.iterator](): Iterator<T> {
+    return new FlatIterator(this.source, this.depth);
+  }
+}
+
+class FlatIterator<T> implements Iterator<T, undefined> {
+  protected source: Iterator<T | Iterable<T>, undefined>;
+  protected depth?: number;
+  protected currentSource?: Iterator<T, T>;
+
+  constructor(source: Iterable<T | Iterable<T>>, depth?: number) {
     let deepSource = source;
     if (depth && depth > 1) {
-      deepSource = new FlatIterableIterator(deepSource, depth - 1);
+      this.source = new FlatIterator(deepSource, depth - 1);
+    } else {
+      this.source = source[Symbol.iterator]();
     }
-    super(deepSource);
-    this.rawSource = source;
     this.depth = depth;
   }
 
@@ -24,12 +36,7 @@ export default class FlatIterableIterator<T> extends TransformIterableIterator<T
     if (!this.currentSource) {
       const { done, value } = this.source.next();
       if (done === true) return { done: true, value: undefined };
-      if (value instanceof TransformIterableIterator) {
-        this.currentSource = value;
-      } else {
-        // TODO find better way to cast
-        this.currentSource = new ArrayTransIterableIterator(isIterable(value) ? value : [value] as any);
-      }
+      this.currentSource = (isIterable(value) ? value : [value])[Symbol.iterator]() as Iterator<T, T>;
     }
 
     const { done, value } = this.currentSource.next();
@@ -42,9 +49,5 @@ export default class FlatIterableIterator<T> extends TransformIterableIterator<T
       done: false,
       value
     }
-  }
-
-  [Symbol.iterator](): IterableIterator<T> {
-    return new FlatIterableIterator(this.rawSource, this.depth);
   }
 }

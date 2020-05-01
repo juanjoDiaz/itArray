@@ -1,25 +1,42 @@
-import ValuesIterableIterator from "./Values";
+import IterableWithSource from "../IterableWithSource";
 
-export default class SliceIterableIterator<T> extends ValuesIterableIterator<T> {
+export default class SliceIterable<T> extends IterableWithSource<T, T> {
   private begin?: number;
   private end?: number;
   protected index: number = 0;
 
-  constructor(source: IterableIterator<T>, begin?: number, end?: number) {
+  constructor(source: Iterable<T>, begin?: number, end?: number) {
     super(source);
     this.begin = begin;
     this.end = end;
   }
 
+  [Symbol.iterator](): Iterator<T> {
+    return new SliceIterator(this.source, this.begin, this.end);
+  }
+}
+
+class SliceIterator<T> implements Iterator<T> {
+  protected source: Iterator<any, T>;
+  private begin?: number;
+  private end?: number;
+  protected index: number = 0;
+
+  constructor(source: Iterable<T>, begin?: number, end?: number) {
+    this.source = source[Symbol.iterator]();
+    this.begin = begin;
+    this.end = end;
+  }
+
   next(): IteratorResult<T, undefined> {
-    if (this.begin) {
+    if (this.begin !== undefined) {
       while (this.index < this.begin) {
         if (this.source.next().done) return { done: true, value: undefined };
         this.index += 1;
       }
     }
 
-    if (this.end && this.index >= this.end) {
+    if (this.end !== undefined && this.index >= this.end) {
       return { done: true, value: undefined };
     }
 
@@ -28,9 +45,5 @@ export default class SliceIterableIterator<T> extends ValuesIterableIterator<T> 
 
     this.index++;
     return { done, value };
-  }
-
-  [Symbol.iterator](): IterableIterator<T> {
-    return new SliceIterableIterator(this.source, this.begin, this.end);
   }
 }

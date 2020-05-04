@@ -1,7 +1,7 @@
 import IterableWithSource from "../IterableWithSource";
 
 export default class FilterIterable<T> extends IterableWithSource<T, T>  {
-  protected fn: (v: T, k: number) => boolean;
+  public fn: (v: T, k: number) => boolean;
 
   constructor(source: Iterable<T>, fn: (v: T, k: number) => boolean) {
     super(source);

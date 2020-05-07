@@ -73,7 +73,6 @@ export class OptimizedFilterAndMapIterable<TIn, TOut> extends IterableWithSource
 class OptimizedFilterAndMapIterator<TIn, TOut> implements Iterator<TOut, undefined> {
   protected source: Iterator<TIn, TIn>;
   protected steps: Step[];
-  protected index: number = 0;
 
   constructor(source: Iterable<TIn>, steps: Step[]) {
     this.source = source[Symbol.iterator]();

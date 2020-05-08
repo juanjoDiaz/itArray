@@ -5,6 +5,8 @@ import FlatIterable from "./Iterators/Flat";
 import reduce from "./reducers/Reducer";
 import find from "./reducers/Find";
 import { OptimizedFilterAndMapIterable, OptimizedFilterIterable, OptimizedMapIterable } from "./Iterators/Optimized";
+import { safeToString, safeToLocaleString } from "./utils";
+
 
 export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T>, 
   constructor(source: Iterable<T>) {
@@ -18,12 +20,6 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
   // set length(length: number) {
   //   throw new Error("Method not implemented.");
   // };
-  // toString(): string {
-  //   return new ToStringReducer(this).return().value;
-  // }
-  // toLocaleString(): string {
-  //   return new ToLocaleStringReducer(this).return().value;
-  // }
   pop(): T | undefined {
     throw new Error("Method not implemented.");
   }
@@ -142,6 +138,12 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
   }
   flat<U>(this: TransArray<U | Iterable<U>>, depth?: number): TransArray<U>{
     return new TransArray(new FlatIterable(this.source, depth));
+  }
+  toString(): string {
+    return this.reduce((acc, v, k) => k === 0 ? safeToString(v) : `${acc},${safeToString(v)}`, '');
+  }
+  toLocaleString(): string {
+    return this.reduce((acc, v, k) => k === 0 ? safeToLocaleString(v) : `${acc},${safeToLocaleString(v)}`, '');
   }
   toArray(): Array<T> {
     return this.reduce((acc, v) => {

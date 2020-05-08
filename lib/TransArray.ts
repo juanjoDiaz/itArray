@@ -88,13 +88,13 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
   optimizedmap<U>(callbackfn: (value: T, index: number) => U): TransArray<U> {
     if (this.source instanceof OptimizedMapIterable) return new TransArray(this.source.add(callbackfn));
     if (this.source instanceof MapIterable) return new TransArray(new OptimizedMapIterable(this.source.source, [this.source.fn, callbackfn]));
-    if (this.source instanceof FilterIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source).withMap(callbackfn));
+    if (this.source instanceof FilterIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source.source).withFilter(this.source.fn).withMap(callbackfn));
     if (this.source instanceof OptimizedFilterAndMapIterable) return new TransArray(this.source.withMap(callbackfn));
     return new TransArray(new MapIterable(this.source, callbackfn));
   }
   optimized2map<U>(callbackfn: (value: T, index: number) => U): TransArray<U> {
     if (this.source instanceof MapIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source.source).withMap(callbackfn));
-    if (this.source instanceof FilterIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source).withMap(callbackfn));
+    if (this.source instanceof FilterIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source.source).withFilter(this.source.fn).withMap(callbackfn));
     if (this.source instanceof OptimizedFilterAndMapIterable) return new TransArray(this.source.withMap(callbackfn));
     return new TransArray(new MapIterable(this.source, callbackfn));
   }
@@ -104,13 +104,13 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
   optimizedfilter(callbackfn: (value: T, index: number) => boolean): TransArray<T> {
     if (this.source instanceof OptimizedFilterIterable) return new TransArray(this.source.add(callbackfn));
     if (this.source instanceof FilterIterable) return new TransArray(new OptimizedFilterIterable(this.source.source, [this.source.fn, callbackfn]));
-    if (this.source instanceof MapIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source).withFilter(callbackfn));
+    if (this.source instanceof MapIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source.source).withMap(this.source.fn).withFilter(callbackfn));
     if (this.source instanceof OptimizedFilterAndMapIterable) return new TransArray(this.source.withFilter(callbackfn));
     return new TransArray(new FilterIterable(this.source, callbackfn));
   }
   optimized2filter(callbackfn: (value: T, index: number) => boolean): TransArray<T> {
     if (this.source instanceof FilterIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source.source).withFilter(callbackfn));
-    if (this.source instanceof MapIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source).withFilter(callbackfn));
+    if (this.source instanceof MapIterable) return new TransArray(new OptimizedFilterAndMapIterable<T, T>(this.source.source).withMap(this.source.fn).withFilter(callbackfn));
     if (this.source instanceof OptimizedFilterAndMapIterable) return new TransArray(this.source.withFilter(callbackfn));
     return new TransArray(new FilterIterable(this.source, callbackfn));
   }

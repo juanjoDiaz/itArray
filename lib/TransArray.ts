@@ -2,7 +2,6 @@ import IterableWithSource from "./IterableWithSource";
 import MapIterable from "./Iterators/Map";
 import FilterIterable from "./Iterators/Filter";
 import FlatIterable from "./Iterators/Flat";
-import ReverseIterable from "./Iterators/Reverse";
 import reduce from "./reducers/Reducer";
 import find from "./reducers/Find";
 import { OptimizedFilterAndMapIterable, OptimizedFilterIterable, OptimizedMapIterable } from "./Iterators/Optimized";
@@ -45,7 +44,7 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
   }
   reverse(): TransArray<T> {
     // TODO instead of reversing in memory, recreate the whole chain with the reverse on top.
-    return new TransArray(new ReverseIterable(this.source));
+    return new TransArray(this.toArray().reverse());
   }
   shift(): T | undefined {
     throw new Error("Method not implemented.");
@@ -54,8 +53,10 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
     // TODO add early termination
     return this.filter((_, i) => (!start || i >= start) && (!end || i <= end));
   }
-  sort(compareFn?: ((a: T, b: T) => number) | undefined): this {
-    throw new Error("Method not implemented.");
+  sort(compareFn?: ((a: T, b: T) => number) | undefined): TransArray<T> {
+    const sortedSrc = this.toArray();
+    sortedSrc.sort(compareFn);
+    return new TransArray(sortedSrc);
   }
   indexOf(searchElement: T, fromIndex?: number): number {
     return this.findIndex((v) => v === searchElement);

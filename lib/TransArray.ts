@@ -57,9 +57,9 @@ export default class TransArray<T> extends IterableWithSource<T, T> { // Array<T
   indexOf(searchElement: T, fromIndex?: number): number {
     return this.findIndex((v) => v === searchElement);
   }
-  // lastIndexOf(searchElement: T, fromIndex?: number): number {
-  //   return new LastIndexOfReducer(this, searchElement).return().value;
-  // }
+  lastIndexOf(searchElement: T, fromIndex?: number): number {
+    return this.reduce((acc, v, k) => v === searchElement ? k : acc , -1);
+  }
   includes(searchElement: T, fromIndex?: number): boolean {
     return this.indexOf(searchElement, fromIndex) !== -1;
   }

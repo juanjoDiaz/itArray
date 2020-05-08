@@ -92,9 +92,11 @@ class OptimizedFilterAndMapIterator<TIn, TOut> implements Iterator<TOut, undefin
           value = step.fn(value, step.index++);
           continue;
         case StepKind.Filter:
-          while (!step.fn(value, step.index++)) {
+          if (!step.fn(value, step.index++)) {
+            // Same as this.next(); but doesn't fill the call stack
             ({ done, value } = this.source.next());
             if (done) return { done: true, value: undefined };
+            index = 0;
           }
           continue;
       }

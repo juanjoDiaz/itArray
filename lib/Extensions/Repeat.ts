@@ -14,20 +14,22 @@ export default class RepeatIterable<T> implements Iterable<T> {
 
 class RepeatIterator<T> implements Iterator<T> {
   private value: T;
-  private length: number;
+  private length?: number;
   private counter: number = 0;
 
-  constructor(value: T, length: number = Number.POSITIVE_INFINITY) {
+  constructor(value: T, length?: number) {
     this.value = value;
     this.length = length;
   }
 
   next(): IteratorResult<T, undefined> {
-    if (this.counter >= this.length) {
-      return { done: true, value: undefined };
-    }
+    if (this.length) {
+      if (this.counter >= this.length) {
+        return { done: true, value: undefined };
+      }
 
-    this.counter += 1;
+      this.counter += 1;
+    }
     return { done: false, value: this.value };
   }
 }

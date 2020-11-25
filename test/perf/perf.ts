@@ -6,7 +6,7 @@ const Benchmark = require('benchmark');
 
 function mapSuite<T>(src: Array<T>) {
   return new Benchmark.Suite()
-    .add('TransArray#map', () => iterableToArray(new TransArray(src).map((v, k) => `K: ${k} -> V: ${v}`)))
+    .add('TransArray#map', () => new TransArray(src).map((v, k) => `K: ${k} -> V: ${v}`).toArray())
     .add('Lodash#map', () => _.map(src, (v, k) => `K: ${k} -> V: ${v}`))
     .add('Array#map', () => src.map((v, k) => `K: ${k} -> V: ${v}`))
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -15,7 +15,7 @@ function mapSuite<T>(src: Array<T>) {
 
 function keysSuite<T>(src: Array<T>) {
   return new Benchmark.Suite()
-    .add('TransArray#keys', () => iterableToArray(new TransArray(src).keys()))
+    .add('TransArray#keys', () => new TransArray(src).keys().toArray())
     .add('Lodash#keys', () => _.keys(src))
     .add('Array#keys', () => iterableToArray(src.keys()))
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -24,7 +24,7 @@ function keysSuite<T>(src: Array<T>) {
 
 function valuesSuite<T>(src: Array<T>) {
   return new Benchmark.Suite()
-    .add('TransArray#values', () => iterableToArray(new TransArray(src).values()))
+    .add('TransArray#values', () => new TransArray(src).values().toArray())
     .add('Lodash#values', () => _.values(src))
     .add('Array#values', () => iterableToArray(src.values()))
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -33,7 +33,7 @@ function valuesSuite<T>(src: Array<T>) {
 
 function entriesSuite<T>(src: Array<T>) {
   return new Benchmark.Suite()
-    .add('TransArray#entries', () => iterableToArray(new TransArray(src).entries()))
+    .add('TransArray#entries', () => new TransArray(src).entries().toArray())
     .add('Lodash#entries', () => _.entries(src))
     .add('Array#entries', () => iterableToArray(src.entries()))
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -44,7 +44,7 @@ function entriesSuite<T>(src: Array<T>) {
 
 function filterSuite(src: Array<number>) {
   return new Benchmark.Suite()
-    .add('TransArray#filter', () => iterableToArray(new TransArray(src).filter((v, k) => v % 2 === 0)))
+    .add('TransArray#filter', () => new TransArray(src).filter((v, k) => v % 2 === 0).toArray())
     .add('Lodash#filter', () => _.map(src, (v, k) => `K: ${k} -> V: ${v}`))
     .add('Array#filter', () => src.map((v, k) => `K: ${k} -> V: ${v}`))
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -61,8 +61,8 @@ function flatSuite(src: Array<number>) {
   }
 
   return new Benchmark.Suite()
-    .add('TransArray#flat', () => iterableToArray(new TransArray(nestedSrc).flat()))
-    // .add('FlatIterable#flat', () => iterableToArray(new FlatIterable(nestedSrc)))
+    .add('TransArray#flat', () => new TransArray(nestedSrc).flat().toArray())
+    // .add('FlatIterable#flat', () => new FlatIterable(nestedSrc)))
     .add('Lodash#flat', () => _.flatten(nestedSrc))
     .add('Array#flat', () => nestedSrc.flat())
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -80,8 +80,8 @@ function concatSuite(src: Array<number>) {
   }
 
   return new Benchmark.Suite()
-    .add('TransArray#concat', () => iterableToArray(new TransArray<number>([]).concat(...nestedSrc)))
-    // .add('ConcatIterable#concat', () => iterableToArray(new ConcatIterable<number>([], ...nestedSrc)))
+    .add('TransArray#concat', () => new TransArray<number>([]).concat(...nestedSrc).toArray())
+    // .add('ConcatIterable#concat', () => new ConcatIterable<number>([], ...nestedSrc)))
     .add('Lodash#concat', () => _.concat([], ...nestedSrc))
     .add('Array#concat', () => ([] as number[]).concat(...nestedSrc))
     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -171,8 +171,8 @@ function someSuite(src: Array<number>) {
 
 // function mapAndFilterSuite(src: Array<number>) {
 //   return new Benchmark.Suite()
-//     .add('TransArray#map&filter', () => iterableToArray(new TransArray(src).map((v, k) => ({k, v })).filter((v, k) => v.v % 2 === 0)))
-//     // .add('MapIterable#map&filter', () => iterableToArray(new FilterIterable(new MapIterable(src, (v, k) => ({k, v })), (v, k) => v.v % 2 === 0)))
+//     .add('TransArray#map&filter', () => new TransArray(src).map((v, k) => ({k, v })).filter((v, k) => v.v % 2 === 0)))
+//     // .add('MapIterable#map&filter', () => new FilterIterable(new MapIterable(src, (v, k) => ({k, v })), (v, k) => v.v % 2 === 0)))
 //     .add('Lodash#map&filter', () => _.map(src, (v, k) => ({k, v })).filter((v, k) => v.v % 2 === 0))
 //     .add('Array#map&filter', () => src.map((v, k) => ({k, v })).filter((v, k) => v.v % 2 === 0))
 //     .on('cycle', (event: any) => console.log(String(event.target)))
@@ -181,22 +181,33 @@ function someSuite(src: Array<number>) {
 
 function mapChainSuite(src: Array<number>) {
   return new Benchmark.Suite()
-    .add('TransArray#mapChain', () => iterableToArray(new TransArray<number>(src)
+    .add('TransArray#mapChain', () => new TransArray<number>(src)
       .map((v, k) => ({ k, v }))
       .map(x => x.v)
       .map((v, k) => ({ k, v }))
       .map(x => x.v)
       .map((v, k) => ({ k, v }))
       .map(x => x.v)
-    ))
-    .add('TransArrayOptiomized#mapChain', () => iterableToArray(new TransArray<number>(src)
+      .toArray()
+    )
+    .add('TransArrayOptimized#mapChain', () => new TransArray<number>(src)
       .optimizedmap((v, k) => ({ k, v }))
       .optimizedmap(x => x.v)
       .optimizedmap((v, k) => ({ k, v }))
       .optimizedmap(x => x.v)
       .optimizedmap((v, k) => ({ k, v }))
       .optimizedmap(x => x.v)
-    ))
+      .toArray()
+    )
+    .add('TransArrayOptimized2#mapChain', () => new TransArray<number>(src)
+      .optimized2map((v, k) => ({ k, v }))
+      .optimized2map(x => x.v)
+      .optimized2map((v, k) => ({ k, v }))
+      .optimized2map(x => x.v)
+      .optimized2map((v, k) => ({ k, v }))
+      .optimized2map(x => x.v)
+      .toArray()
+    )
     .add('Lodash#mapChain', () => _
       .map(src, (v, k) => ({ k, v }))
       .map(x => x.v)
@@ -220,22 +231,33 @@ function mapChainSuite(src: Array<number>) {
 
 function filterChainSuite(src: Array<number>) {
   return new Benchmark.Suite()
-    .add('TransArray#filterChain', () => iterableToArray(new TransArray(src)
+    .add('TransArray#filterChain', () => new TransArray(src)
       .filter((v, k) => v > 0)
       .filter((v, k) => v % 2 === 0)
       .filter((v, k) => v > 0)
       .filter((v, k) => v % 2 === 0)
       .filter((v, k) => v > 0)
       .filter((v, k) => v % 2 === 0)
-    ))
-    .add('TransArrayOptimized#filterChain', () => iterableToArray(new TransArray(src)
+      .toArray()
+    )
+    .add('TransArrayOptimized#filterChain', () => new TransArray(src)
       .optimizedfilter((v, k) => v > 0)
       .optimizedfilter((v, k) => v % 2 === 0)
       .optimizedfilter((v, k) => v > 0)
       .optimizedfilter((v, k) => v % 2 === 0)
       .optimizedfilter((v, k) => v > 0)
       .optimizedfilter((v, k) => v % 2 === 0)
-    ))
+      .toArray()
+    )
+    .add('TransArrayOptimized2#filterChain', () => new TransArray(src)
+      .optimized2filter((v, k) => v > 0)
+      .optimized2filter((v, k) => v % 2 === 0)
+      .optimized2filter((v, k) => v > 0)
+      .optimized2filter((v, k) => v % 2 === 0)
+      .optimized2filter((v, k) => v > 0)
+      .optimized2filter((v, k) => v % 2 === 0)
+      .toArray()
+    )
     .add('Lodash#filterChain', () => 
       _.filter(src, (v, k) => v > 0)
       .filter((v, k) => v % 2 === 0)
@@ -258,7 +280,7 @@ function filterChainSuite(src: Array<number>) {
 
 function mapAndFiltersSuite(src: Array<number>) {
   return new Benchmark.Suite()
-    .add('TransArray#mapAndFilters', () => iterableToArray(new TransArray<number>(src)
+    .add('TransArray#mapAndFilters', () => new TransArray<number>(src)
       .map((v, k) => ({ k, v }))
       .filter((v, k) => v.v !== k)
       .map(x => x.v)
@@ -270,8 +292,9 @@ function mapAndFiltersSuite(src: Array<number>) {
       .map((v, k) => ({ k, v }))
       .filter((v, k) => v.v !== k)
       .map(x => x.v)
-    ))
-    .add('TransArrayOptimized#mapAndFilters', () => iterableToArray(new TransArray<number>(src)
+      .toArray()
+    )
+    .add('TransArrayOptimized#mapAndFilters', () => new TransArray<number>(src)
       .optimizedmap((v, k) => ({ k, v }))
       .optimizedfilter((v, k) => v.v !== k)
       .optimizedmap(x => x.v)
@@ -283,8 +306,9 @@ function mapAndFiltersSuite(src: Array<number>) {
       .optimizedmap((v, k) => ({ k, v }))
       .optimizedfilter((v, k) => v.v !== k)
       .optimizedmap(x => x.v)
-    ))
-    .add('TransArrayOptimized2#mapAndFilters', () => iterableToArray(new TransArray<number>(src)
+      .toArray()
+    )
+    .add('TransArrayOptimized2#mapAndFilters', () => new TransArray<number>(src)
       .optimized2map((v, k) => ({ k, v }))
       .optimized2filter((v, k) => v.v !== k)
       .optimized2map(x => x.v)
@@ -296,7 +320,8 @@ function mapAndFiltersSuite(src: Array<number>) {
       .optimized2map((v, k) => ({ k, v }))
       .optimized2filter((v, k) => v.v !== k)
       .optimized2map(x => x.v)
-    ))
+      .toArray()
+    )
     .add('Lodash#mapAndFilters', () => _
       .map(src, (v, k) => ({ k, v }))
       .filter((v, k) => v.v !== k)
@@ -322,6 +347,164 @@ function mapAndFiltersSuite(src: Array<number>) {
       .map((v, k) => ({ k, v }))
       .filter((v, k) => v.v !== k)
       .map(x => x.v)
+    )
+    .on('cycle', (event: any) => console.log(String(event.target)))
+    // .on('complete', () => console.log('Fastest is ' + suite.filter('fastest').map('name')))
+}
+
+function slowMap<TIn, TOut>(fn: (v: TIn, k: number) => TOut) {
+  return (v: TIn, k: number) => {
+    let r = 0;
+    for (let i = 0; i < 10000; i++) r += i;
+    return fn(v, k);
+  }
+}
+function slowMapChainSuite(src: Array<number>) {
+  return new Benchmark.Suite()
+    .add('TransArray#mapChain', () => new TransArray<number>(src)
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .toArray()
+    )
+    .add('TransArrayOptimized#mapChain', () => new TransArray<number>(src)
+      .optimizedmap(slowMap((v, k) => ({ k, v })))
+      .optimizedmap(slowMap(x => x.v))
+      .optimizedmap(slowMap((v, k) => ({ k, v })))
+      .optimizedmap(slowMap(x => x.v))
+      .optimizedmap(slowMap((v, k) => ({ k, v })))
+      .optimizedmap(slowMap(x => x.v))
+      .toArray()
+    )
+    .add('TransArrayOptimized2#mapChain', () => new TransArray<number>(src)
+      .optimized2map(slowMap((v, k) => ({ k, v })))
+      .optimized2map(slowMap(x => x.v))
+      .optimized2map(slowMap((v, k) => ({ k, v })))
+      .optimized2map(slowMap(x => x.v))
+      .optimized2map(slowMap((v, k) => ({ k, v })))
+      .optimized2map(slowMap(x => x.v))
+      .toArray()
+    )
+    .add('Lodash#mapChain', () => _
+      .map(src, slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+    )
+    .add('Array#mapChain', () => src
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+      .map(slowMap((v, k) => ({ k, v })))
+      .map(slowMap(x => x.v))
+    )
+    .on('cycle', (event: any) => console.log(String(event.target)))
+    // .on('complete', () => console.log('Fastest is ' + suite.filter('fastest').map('name')))
+}
+
+function slowFilter<TIn, TOut>(fn: (v: TIn, k: number) => boolean) {
+  return (v: TIn, k: number) => {
+    let r = 0;
+    for (let i = 0; i < 10000; i++) r += i;
+    return fn(v, k);
+  }
+}
+function slowFilterChainSuite(src: Array<number>) {
+  return new Benchmark.Suite()
+    .add('TransArray#filterChain', () => new TransArray(src)
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .toArray()
+    )
+    .add('TransArrayOptimized#filterChain', () => new TransArray(src)
+      .optimizedfilter(slowFilter((v, k) => v > 0))
+      .optimizedfilter(slowFilter((v, k) => v % 2 === 0))
+      .optimizedfilter(slowFilter((v, k) => v > 0))
+      .optimizedfilter(slowFilter((v, k) => v % 2 === 0))
+      .optimizedfilter(slowFilter((v, k) => v > 0))
+      .optimizedfilter(slowFilter((v, k) => v % 2 === 0))
+      .toArray()
+    )
+    .add('TransArrayOptimized2#filterChain', () => new TransArray(src)
+      .optimized2filter(slowFilter((v, k) => v > 0))
+      .optimized2filter(slowFilter((v, k) => v % 2 === 0))
+      .optimized2filter(slowFilter((v, k) => v > 0))
+      .optimized2filter(slowFilter((v, k) => v % 2 === 0))
+      .optimized2filter(slowFilter((v, k) => v > 0))
+      .optimized2filter(slowFilter((v, k) => v % 2 === 0))
+      .toArray()
+    )
+    .add('Lodash#filterChain', () => 
+      _.filter(src, slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+    )
+    .add('Array#filterChain', () => src
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+      .filter(slowFilter((v, k) => v > 0))
+      .filter(slowFilter((v, k) => v % 2 === 0))
+    )
+    .on('cycle', (event: any) => console.log(String(event.target)))
+    // .on('complete', () => console.log('Fastest is ' + suite.filter('fastest').map('name')))
+}
+
+function slowMapAndFiltersSuite(src: Array<number>) {
+  return new Benchmark.Suite()
+    .add('TransArray#mapAndFilters', () => new TransArray<number>(src)
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .filter(slowFilter((v, k) => v !== k))
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .filter(slowFilter((v, k) => v !== k))
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .toArray()
+    )
+    .add('Lodash#mapAndFilters', () => _
+      .map(src, slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .filter(slowFilter((v, k) => v !== k))
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .filter(slowFilter((v, k) => v !== k))
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+    )
+    .add('Array#mapAndFilters', () => src
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .filter(slowFilter((v, k) => v !== k))
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
+      .filter(slowFilter((v, k) => v !== k))
+      .map(slowMap((v, k) => ({ k, v })))
+      .filter(slowFilter((v, k) => v.v !== k))
+      .map(slowMap(x => x.v))
     )
     .on('cycle', (event: any) => console.log(String(event.target)))
     // .on('complete', () => console.log('Fastest is ' + suite.filter('fastest').map('name')))
@@ -367,31 +550,39 @@ function allSuite(src: Array<number>) {
 }
 
 console.table({
-  // map: race(mapSuite),
-  // keys: race(keysSuite),
-  // values: race(valuesSuite),
-  // entries: race(entriesSuite),
-  // filter: race(filterSuite),
-  // flat: race(flatSuite),
-  // concat: race(concatSuite),
-  // reduce: race(reduceSuite),
-  // join: race(joinSuite),
-  // forEach: race(forEachSuite),
-  // indexOf: race(indexOfSuite),
-  // includes: race(includesSuite),
-  // findIndex : race(findIndexSuite),
-  // every : race(everySuite),
-  // some : race(someSuite),
-  // find: race(findSuite),
-  // mapChain: race(mapChainSuite),
-  // filterChain: race(filterChainSuite),
+  map: race(mapSuite),
+  keys: race(keysSuite),
+  values: race(valuesSuite),
+  entries: race(entriesSuite),
+  filter: race(filterSuite),
+  flat: race(flatSuite),
+  concat: race(concatSuite),
+  reduce: race(reduceSuite),
+  join: race(joinSuite),
+  forEach: race(forEachSuite),
+  indexOf: race(indexOfSuite),
+  includes: race(includesSuite),
+  findIndex : race(findIndexSuite),
+  every : race(everySuite),
+  some : race(someSuite),
+  find: race(findSuite),
+});
+
+console.table({
+  // // Combined
+  mapChain: race(mapChainSuite),
+  filterChain: race(filterChainSuite),
   mapAndFilter: race(mapAndFiltersSuite),
-  // all: race(allSuite),
+  // // Slow
+  slowMapChain: race(slowMapChainSuite),
+  slowFilterChain: race(slowFilterChainSuite),
+  slowMapAndFilter: race(slowMapAndFiltersSuite),
+  all: race(allSuite),
 })
 
 function race(suite: any) {
   let res = {} as any;
-  for (let index = 100; index <= 100; index = index * 10) {
+  for (let index = 10; index <= 1000; index = index * 10) {
     console.log(`TESTING ${index}`);
     const src = Array(index).fill(0).map((v, k) => k + 1);
     const suiteResults = suite(src).run();
